@@ -10,9 +10,10 @@ import UIKit
 import AVFoundation
 
 class ViewController: UIViewController {
-
+    // MARK: - Properties
     @IBOutlet weak var awesomeImage: UIImageView!
     @IBOutlet weak var messageLabel: UILabel!
+    @IBOutlet weak var soundSwitch: UISwitch!
     var awesomePlayer = AVAudioPlayer()
     var index = -1
     var imageNumber = -1
@@ -20,16 +21,17 @@ class ViewController: UIViewController {
     let numberOfImages = 6
     let numberOfSounds = 6
     var soundName = ""
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
     }
     
-    func playSound(soundName: String) {
+    // MARK: - My Own Functions
+    func playSound(soundName: String, audioPlayer: inout AVAudioPlayer) {
         if let sound = NSDataAsset(name: soundName) {
             do {
-                try awesomePlayer = AVAudioPlayer(data: sound.data)
-                awesomePlayer.play()
+                try audioPlayer = AVAudioPlayer(data: sound.data)
+                audioPlayer.play()
             } catch {
                 print("ERROR: file \(soundName) couldn't be played as a sound")
             }
@@ -46,6 +48,15 @@ class ViewController: UIViewController {
         return newIndex
         
     }
+    
+    // MARK: - Actions
+    @IBAction func soundSwitchPressed(_ sender: UISwitch) {
+        if !soundSwitch.isOn && soundNumber != -1 {
+            // stop playing
+            awesomePlayer.stop()
+        }
+    }
+    
     @IBAction func showMessagePressed(_ sender: UIButton) {
         let messages = ["You Are Fantastic!",
                         "You Are Great!",
@@ -61,14 +72,24 @@ class ViewController: UIViewController {
         messageLabel.text = messages[index]
         
         // show image
-        awesomeImage.isHidden = false
+        // awesomeImage.isHidden = false
         imageNumber = nonRepeatingRandom(lastNumber: imageNumber, maxValue: numberOfImages)
         awesomeImage.image = UIImage(named: "image\(imageNumber)")
         
-        // get a random number to use in soundName file
-        soundNumber = nonRepeatingRandom(lastNumber: soundNumber, maxValue: numberOfSounds)
-        soundName = "sound\(soundNumber)"
-        playSound(soundName: soundName)
+        if soundSwitch.isOn {
+            // get a random number to use in soundName file
+            soundNumber = nonRepeatingRandom(lastNumber: soundNumber, maxValue: numberOfSounds)
+            // play a sound
+            soundName = "sound\(soundNumber)"
+            playSound(soundName: soundName, audioPlayer: &awesomePlayer)
+        }
+        
+
+        
+        
+        
+        
+        
         
         // index = newIndex
         // messageLabel.text = messages[index]
